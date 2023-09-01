@@ -7,7 +7,7 @@ use colored::Colorize;
 
 fn main() {
 
-    get_info();
+   print_info();
 }
 
 
@@ -15,11 +15,15 @@ fn main() {
 struct Win32_OperatingSystem {
     Caption: String,
     BuildNumber: String,
+    RegisteredUser: String,
+    SystemDrive: String,
 }
 
 #[derive(Deserialize, Debug)]
 struct Win32_BIOS {
     SerialNumber: String,
+    Version: String,
+    SMBIOSBIOSVersion: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -44,13 +48,41 @@ struct Win32_PhysicalMemoryArray {
 }
 
 #[derive(Deserialize, Debug)]
+struct Win32_VideoController {
+    Name: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct Win32_PhysicalMemory {
+    Capacity: usize,
+    DeviceLocator: String,
+}
+
+#[derive(Deserialize, Debug)]
 struct Win32_Processor {
     Name: String,
     NumberOfCores: usize,
     MaxClockSpeed: usize,
+
+}#[derive(Deserialize, Debug)]
+struct Win32_NetworkAdapterConfiguration {
+    Description: String,
+    IPEnabled: bool,
+    DHCPEnabled: bool,
+    DefaultIPGateway: Vec<String>,
+    DNSServerSearchOrder: Vec<String>,
+    MACAddress: Option<String>,
+    IPAddress: Vec<String>,
 }
 
-fn get_info() {
+#[derive(Deserialize, Debug)]
+struct Win32_LogicalDisk {
+    DeviceID: String,
+    VolumeName: String,
+    Size: usize,
+}
+
+fn print_info() {
 
     let com = COMLibrary::new().unwrap();
     let wmi = WMIConnection::new(com.into()).unwrap();
@@ -62,44 +94,84 @@ fn get_info() {
     let cpu : Vec<Win32_Processor>;
     let memory : Vec<Win32_PhysicalMemoryArray>;
 
+    let dimm : Vec<Win32_PhysicalMemory>;
+    let nic : Vec<Win32_NetworkAdapterConfiguration>;
+    let vol : Vec<Win32_LogicalDisk>;
+    let video : Vec<Win32_VideoController>;
+    
+
     os = wmi.query().unwrap();
     bios = wmi.query().unwrap();
     computer = wmi.query().unwrap();
     disk = wmi.query().unwrap();
     cpu = wmi.query().unwrap();
     memory = wmi.query().unwrap();
-
-
+    dimm = wmi.query().unwrap();
+    nic = wmi.query().unwrap();
+    vol = wmi.query().unwrap();
+    video = wmi.query().unwrap();
+    
     let mem = to_GB(computer[0].TotalPhysicalMemory).to_string();
     let build:&str = &os[0].BuildNumber;
     let version = buid_to_version(build);
-    let speed = to_GHz(cpu[0].MaxClockSpeed);
-    let cores = cpu[0].NumberOfCores.to_string();
+
+    println!();
+    println!("{}", "--------------------------------------------------------------------------------".red());
+    println!("{}", "hwinfo (c) luke maciak".red().italic());
+    println!("{}", "--------------------------------------------------------------------------------".red());
 
     println!();
     println!("{}:\t\t{}", "Manufacturer".bold().blue(), computer[0].Manufacturer);
     println!("{}:\t\t{}", "Model Name".bold().blue(), computer[0].Model);
     println!("{}:\t\t{}", "Service Tag".bold().blue(), bios[0].SerialNumber);
-    
+    println!("{}:\t\t{}", "BIOS Version".bold().blue(), bios[0].Version);
+    println!("{}:\t\t{}", "SMBIOS Version".bold().blue(), bios[0].SMBIOSBIOSVersion);
     println!();
-    println!("{}:\t\t{}", "CPU Name".bold().cyan(), cpu[0].Name);
-    println!("{}:\t\t{:.2}GHz", "CPU Speed".bold().cyan(), speed);
-    println!("{}:\t{}", "Number of Cores".bold().cyan(), cores);
+    
+    println!("{}", "---Processor and Graphics-------------------------------------------------------".red());
+    println!();
+    for p in &cpu {
+        let speed = to_GHz(p.MaxClockSpeed);
+        let cores = p.NumberOfCores.to_string();
+        println!("{}:\t\t{}", "CPU Name".bold().cyan(), cpu[0].Name);
+        println!("{}:\t\t{:.2}GHz", "CPU Speed".bold().cyan(), speed);
+        println!("{}:\t{}", "Number of Cores".bold().cyan(), cores);
+        println!("{}:\t\t{}", "Video Card".bold().cyan(), video[0].Name);
+        println!();
+    }
 
+    println!("{}", "---Memory-----------------------------------------------------------------------".red());
     println!();
     println!("{}:\t\t{}GB", "Total Memory".bold().yellow(), mem.yellow());
     println!("{}:\t\t{}", "Memory Slots".bold().yellow(), memory[0].MemoryDevices);
 
     println!();
+    let mut capacity:String;
+    for m in &dimm {
+        capacity = to_GB(m.Capacity).to_string();
+        println!("   {}:\t\t{}", "DIMM #".bold().yellow(), m.DeviceLocator);
+        println!("   {}:\t\t{}GB", "Capacity".bold().yellow(), capacity.yellow());
+        println!();
+    }
+
+    println!("{}", "---Operating System-------------------------------------------------------------".red());
+    println!();
     println!("{}:\t{}", "Operating System".bold().purple(), os[0].Caption.yellow());
     println!("{}:\t\t{}", "Build Number".bold().purple(), build);
     println!("{}:\t\t{}", "Version Number".bold().purple(), version);
+    println!("{}:\t\t{}", "System Drive".bold().purple(), os[0].SystemDrive);
+    println!();
 
+    println!("{}", "---User Information-------------------------------------------------------------".red());
     println!();
     println!("{}:\t\t{}", "Computer Name".bold().red(), computer[0].Name);
     println!("{}:\t\t{}", "Domain Name".bold().red(), computer[0].Domain);
-    println!("{}:\t\t{}", "User Name".bold().red(), computer[0].UserName);
+    println!("{}:\t\t{}", "Current User".bold().red(), computer[0].UserName);
+    println!("{}:\t{}", "Registered User".bold().red(), os[0].RegisteredUser);
+    println!();
 
+
+    println!("{}", "---Physical Drives--------------------------------------------------------------".red());
     println!();
 
     let mut size:String;
@@ -109,6 +181,38 @@ fn get_info() {
         println!("{}:\t\t{}GB", "Disk Size".bold().green(), size.yellow());
         println!();
     }
+
+    println!("{}", "---Logical Volumes--------------------------------------------------------------".red());
+    println!();
+
+    for v in &vol {
+        size = to_GB(v.Size).to_string();
+        println!("{}:\t\t{}", "Drive Letter".bold().green(), v.DeviceID);
+        println!("{}:\t\t{}", "Volume Name".bold().green(), v.VolumeName);
+        println!("{}:\t\t{}GB", "Volume Size".bold().green(), size.yellow());
+        println!();
+    }
+
+    println!("{}", "---Network Adapters-------------------------------------------------------------".red());
+    println!();
+    for n in &nic {
+        if n.IPEnabled {
+
+            println!("{}:\t\t{}", "NIC Name".bold().bright_blue(), n.Description);
+            println!("{}:\t\t{}", "MAC Address".bold().bright_blue(), n.MACAddress.as_ref().unwrap());
+            println!("{}:\t\t{}", "DHCP Enabled".bold().bright_blue(), n.DHCPEnabled);
+            println!("{}:\t\t{}", "IP Address".bold().bright_blue(), n.IPAddress[0]);
+            println!("{}:\t{}", "Default Gateway".bold().bright_blue(), n.DefaultIPGateway[0]);
+            print!("{}:\t\t", "DNS Servers".bold().bright_blue());
+            for dn in &n.DNSServerSearchOrder {
+                print!("{}   ", dn);
+            }
+            println!();
+        }
+    }
+
+    println!();
+    println!("{}", "--------------------------------------------------------------------------------".red());
 
 }
 
