@@ -26,3 +26,17 @@ The information displayed includes:
  - DNS Servers
 
  The output is colorized on the terminal, but can be piped into a file as plain text.
+
+ ## Installing
+
+ This tool is distributed via `scoop` (see [scoop.sh](https://scoop.sh)).
+
+ First, you need to add my bucket:
+
+    scoop bucket add maciak https://github.com/maciakl/bucket
+
+ Next simply run:
+ 
+    scoop install maciak/hwinfo
+
+If you don't want to use `scoop` you can simply download the executable from the release page and extract it somewhere in your path.
