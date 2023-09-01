@@ -6,8 +6,15 @@ use serde::Deserialize;
 use colored::Colorize;
 
 fn main() {
+    
+    let os = std::env::consts::OS;
 
-   print_info();
+    if os != "windows" {
+        eprintln!("sorry, this program currently only works on windows");
+        std::process::exit(1);
+    }
+
+    print_info();
 }
 
 
@@ -78,11 +85,18 @@ struct Win32_NetworkAdapterConfiguration {
 #[derive(Deserialize, Debug)]
 struct Win32_LogicalDisk {
     DeviceID: String,
-    VolumeName: String,
-    Size: usize,
+    VolumeName: Option<String>,
+    ProviderName: Option<String>,
+    Size: Option<usize>,
+    FreeSpace: Option<usize>,
 }
 
 fn print_info() {
+
+    println!();
+    println!("{}", "---hwinfo (c) luke maciak-------------------------------------------------------".on_red().italic());
+    println!("{}", "   see github.com/maciakl/hwinfo".italic());
+    println!();
 
     let com = COMLibrary::new().unwrap();
     let wmi = WMIConnection::new(com.into()).unwrap();
@@ -111,15 +125,12 @@ fn print_info() {
     vol = wmi.query().unwrap();
     video = wmi.query().unwrap();
     
-    let mem = to_GB(computer[0].TotalPhysicalMemory).to_string();
-    let build:&str = &os[0].BuildNumber;
-    let version = buid_to_version(build);
+    let unknown = String::new(); // use for unknown values
+
+
 
     println!();
-    println!("{}", "--------------------------------------------------------------------------------".red());
-    println!("{}", "hwinfo (c) luke maciak".red().italic());
-    println!("{}", "--------------------------------------------------------------------------------".red());
-
+    println!("{}", "---Device Information-----------------------------------------------------------".red());
     println!();
     println!("{}:\t\t{}", "Manufacturer".bold().blue(), computer[0].Manufacturer);
     println!("{}:\t\t{}", "Model Name".bold().blue(), computer[0].Model);
@@ -142,6 +153,9 @@ fn print_info() {
 
     println!("{}", "---Memory-----------------------------------------------------------------------".red());
     println!();
+
+    let mem = to_GB(computer[0].TotalPhysicalMemory).to_string();
+
     println!("{}:\t\t{}GB", "Total Memory".bold().yellow(), mem.yellow());
     println!("{}:\t\t{}", "Memory Slots".bold().yellow(), memory[0].MemoryDevices);
 
@@ -156,6 +170,10 @@ fn print_info() {
 
     println!("{}", "---Operating System-------------------------------------------------------------".red());
     println!();
+
+    let build:&str = &os[0].BuildNumber;
+    let version = buid_to_version(build);
+
     println!("{}:\t{}", "Operating System".bold().purple(), os[0].Caption.yellow());
     println!("{}:\t\t{}", "Build Number".bold().purple(), build);
     println!("{}:\t\t{}", "Version Number".bold().purple(), version);
@@ -175,8 +193,10 @@ fn print_info() {
     println!();
 
     let mut size:String;
+
     for d in &disk {
         size = to_GB(d.Size).to_string();
+
         println!("{}:\t\t{}", "Disk Model".bold().green(), d.Model);
         println!("{}:\t\t{}GB", "Disk Size".bold().green(), size.yellow());
         println!();
@@ -186,10 +206,24 @@ fn print_info() {
     println!();
 
     for v in &vol {
-        size = to_GB(v.Size).to_string();
+        size = match v.Size { 
+            Some(s) => to_GB(s).to_string(),
+            _ => "?".to_string()
+        };
+
+        let free = match v.FreeSpace {
+            Some(f) => to_GB(f).to_string(),
+            _ => "?".to_string()
+        };
+
+        let vname = v.VolumeName.as_ref().unwrap_or(&unknown);
+        let pname = v.ProviderName.as_ref().unwrap_or(&unknown);
+
         println!("{}:\t\t{}", "Drive Letter".bold().green(), v.DeviceID);
-        println!("{}:\t\t{}", "Volume Name".bold().green(), v.VolumeName);
+        println!("{}:\t\t{}", "Volume Name".bold().green(), vname);
+        println!("{}:\t\t{}", "Remote Name".bold().green(), pname);
         println!("{}:\t\t{}GB", "Volume Size".bold().green(), size.yellow());
+        println!("{}:\t\t{}GB", "Free Space".bold().green(), free.yellow());
         println!();
     }
 
@@ -201,7 +235,7 @@ fn print_info() {
             println!("{}:\t\t{}", "NIC Name".bold().bright_blue(), n.Description);
             println!("{}:\t\t{}", "MAC Address".bold().bright_blue(), n.MACAddress.as_ref().unwrap());
             println!("{}:\t\t{}", "DHCP Enabled".bold().bright_blue(), n.DHCPEnabled);
-            println!("{}:\t\t{}", "IP Address".bold().bright_blue(), n.IPAddress[0]);
+            println!("{}:\t\t{}", "IP Address".bold().bright_blue(), n.IPAddress[0].yellow());
             println!("{}:\t{}", "Default Gateway".bold().bright_blue(), n.DefaultIPGateway[0]);
             print!("{}:\t\t", "DNS Servers".bold().bright_blue());
             for dn in &n.DNSServerSearchOrder {
@@ -216,17 +250,19 @@ fn print_info() {
 
 }
 
-
+// Convert bytes to GB returning a rounded unsigned integer
 fn to_GB(memory: usize) -> usize {
     let tmp:f32 = memory as f32 / (1024.0 * 1024.0 * 1024.0);
     tmp.ceil() as usize
 }
 
+// Convert Hz to GHz returning a rounded float
 fn to_GHz(speed:usize) -> f32 {
     let tmp:f32 = speed as f32 / 100.0;
     tmp.round() / 10.0
 }
 
+// Translate the windows build number to the more common version number
 fn buid_to_version(build:&str) -> String {
 
     let version = match build {
