@@ -3,10 +3,11 @@
 
 use wmi::{COMLibrary, WMIConnection};
 use serde::Deserialize;
-use colored::Colorize;
+use colored::*;
 
 fn main() {
 
+   control::set_virtual_terminal(true).unwrap();
    print_info();
 }
 
