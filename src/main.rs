@@ -99,7 +99,7 @@ fn print_info() {
     println!();
     print!("{}", "---hwinfo v".on_red().italic());
     print!("{}", VERSION.on_red().italic());
-    println!("{}", " (c) luke maciak-------------------------------------------------------".on_red().italic());
+    println!("{}", " (c) luke maciak------------------------------------------------".on_red().italic());
     println!("{}", "   see github.com/maciakl/hwinfo".italic());
     println!();
 
