@@ -5,6 +5,8 @@ use wmi::{COMLibrary, WMIConnection};
 use serde::Deserialize;
 use colored::*;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn main() {
     
     let os = std::env::consts::OS;
@@ -95,7 +97,9 @@ struct Win32_LogicalDisk {
 fn print_info() {
 
     println!();
-    println!("{}", "---hwinfo (c) luke maciak-------------------------------------------------------".on_red().italic());
+    print!("{}", "---hwinfo v".on_red().italic());
+    print!("{}", VERSION.on_red().italic());
+    println!("{}", " (c) luke maciak-------------------------------------------------------".on_red().italic());
     println!("{}", "   see github.com/maciakl/hwinfo".italic());
     println!();
 
@@ -232,12 +236,21 @@ fn print_info() {
     println!();
     for n in &nic {
         if n.IPEnabled {
+            
+            let nomac = "n/a".to_string();
 
+            println!();
             println!("{}:\t\t{}", "NIC Name".bold().bright_blue(), n.Description);
-            println!("{}:\t\t{}", "MAC Address".bold().bright_blue(), n.MACAddress.as_ref().unwrap());
+
+            // virtual adapters may not have a mac address
+            println!("{}:\t\t{}", "MAC Address".bold().bright_blue(), n.MACAddress.as_ref().unwrap_or(&nomac));
+
             println!("{}:\t\t{}", "DHCP Enabled".bold().bright_blue(), n.DHCPEnabled);
             println!("{}:\t\t{}", "IP Address".bold().bright_blue(), n.IPAddress[0].yellow());
-            println!("{}:\t{}", "Default Gateway".bold().bright_blue(), n.DefaultIPGateway[0]);
+
+            // default gateway may not exist on vpn connections
+            if n.DefaultIPGateway.len() > 0 { println!("{}:\t{}", "Default Gateway".bold().bright_blue(), n.DefaultIPGateway[0]); }
+
             print!("{}:\t\t", "DNS Servers".bold().bright_blue());
             for dn in &n.DNSServerSearchOrder {
                 print!("{}   ", dn);
