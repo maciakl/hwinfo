@@ -2,6 +2,20 @@
 
 A simple command line tool that displays useful system information.
 
+Example:
+
+<img width="460" alt="hwinfo" src="https://github.com/user-attachments/assets/e1fa04bb-a8f5-4d28-bb21-bc009606fe52" />
+
+## Usage
+
+Just run:
+
+    hwinfo
+
+There are no command line flags or arguments.
+
+## Details
+
 The information displayed includes:
 
 - System Manufacturer
