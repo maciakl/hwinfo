@@ -4,7 +4,7 @@ A simple command line tool that displays useful system information.
 
 Example:
 
-<img width="460" alt="hwinfo" src="https://github.com/user-attachments/assets/e1fa04bb-a8f5-4d28-bb21-bc009606fe52" />
+<img width="631" alt="hwinfon" src="https://github.com/user-attachments/assets/b9fc25c5-944a-4744-ba6d-493077f491d5" />
 
 ## Usage
 
@@ -43,7 +43,11 @@ The information displayed includes:
 
  ## Installing
 
- This tool is distributed via `scoop` (see [scoop.sh](https://scoop.sh)).
+  Install via `cargo`:
+
+     cargo install https://github.com/maciakl/dashword/ 
+
+ This tool is also distributed via `scoop` (see [scoop.sh](https://scoop.sh)).
 
  First, you need to add my bucket:
 
