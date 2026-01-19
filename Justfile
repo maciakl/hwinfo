@@ -21,5 +21,8 @@ release: hash
     git push origin "v{{VER}}"
     gh release create "v{{VER}}" target/release/{{PROJ}}.zip target/release/checksums-{{VER}}.txt --title "v{{VER}}" --generate-notes
 
+publish:
+    cargo publish
+
 clean:
     cargo clean
