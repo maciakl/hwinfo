@@ -3,6 +3,14 @@ name = "hwinfo"
 version = "0.1.5"
 edition = "2021"
 
+license_file = "LICENSE"
+description = "A simple command line tool that displays useful system information."
+homepage = "https://github.com/maciakl/hwinfo"
+repository = "https://github.com/maciakl/hwinfo"
+readme = "README.md"
+keywords = ["system", "information", "hardware", "cli", "tool"]
+categories = ["command-line-utilities", "system-info"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
