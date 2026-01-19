@@ -18,26 +18,46 @@ There are no command line flags or arguments.
 
 The information displayed includes:
 
-- System Manufacturer
-- Model Name
-- Service Tag or Serial Number
-- BIOS Version
-- CPU Name, Speed and number of cores
+- System Information:
+  - Model Name
+  - Service Tag or Serial Number
+  - BIOS Version
+  - SMBIOS Version
+- CPU Information:
+  - Name
+  - Speed
+  - Number of cores
+- Video Card Name
 - Total System Memory
 - Number of memory slots
-- List of installed memory modules, their DIMM number and capacity
-- Windows version and build number
+- List of installed memory modules with following info for each:
+  - DIMM number
+  - Capacity
+- Operating System Information:
+  - OS Name (eg. Microsoft Windows 10 Pro) 
+  - Windows version
+  - Windows build number
 - Hostname
 - Domain or workgroup name
-- Current and registered usernames
-- List of physical storage drives and their capacity
-- List of logical storage volumes along with their drive letter, capacity and free space
-- List of active network adapters along with the following information for each:
- - MAC Adresses
- - IP Addresses
- - Default Gateway
- - DHCP Enabled
- - DNS Servers
+- User information:
+  - local username
+  - registered email 
+- List of physical storage drives along with:
+  - Model Name
+  - Capacity
+- List of logical storage volumes along with:
+  - Drive letter
+  - Volume Name
+  - Remote Name
+  - Capacity
+  - Free space
+- List of active network adapters along with :
+   - NIC Name
+   - MAC Adresses (if available)
+   - DHCP Status
+   - IP Addresses
+   - Default Gateway
+   - DNS Servers
 
  The output is colorized on the terminal, but can be piped into a file as plain text.
 
