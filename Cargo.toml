@@ -3,7 +3,7 @@ name = "hwinfo"
 version = "0.1.5"
 edition = "2021"
 
-license_file = "LICENSE"
+license-file = "LICENSE"
 description = "A simple command line tool that displays useful system information."
 homepage = "https://github.com/maciakl/hwinfo"
 repository = "https://github.com/maciakl/hwinfo"
