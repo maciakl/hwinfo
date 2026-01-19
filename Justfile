@@ -9,8 +9,11 @@ version:
 build:
     cargo build --release
 
-hash: build
-    sha256sum target/release/{{PROJ}}.zip > target/release/checksums-{{VER}}.txt
+zip: build
+    cd target/release && zip {{PROJ}}.zip {{PROJ}}.exe
+
+hash: zip
+    cd target/release && sha256sum {{PROJ}}.zip > checksums-{{VER}}.txt
     cat target/release/checksums-{{VER}}.txt
 
 release: hash
