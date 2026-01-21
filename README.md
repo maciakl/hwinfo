@@ -1,6 +1,6 @@
-# hwinfo
+# 💻hwinfo
 
-A simple command line tool that displays useful system information.
+A simple windows-only command line tool that displays useful system information.
 
 Example:
 
@@ -63,9 +63,15 @@ The information displayed includes:
 
  ## Installing
 
+ ### Cargo
+
   Install via `cargo`:
 
-     cargo install https://github.com/maciakl/dashword/ 
+     cargo install hw-info 
+
+**⚠️Note:** this is a windows only tool.
+
+### Scoop
 
  This tool is also distributed via `scoop` (see [scoop.sh](https://scoop.sh)).
 
@@ -77,4 +83,4 @@ The information displayed includes:
  
     scoop install maciak/hwinfo
 
-If you don't want to use `scoop` you can simply download the executable from the release page and extract it somewhere in your path.
+**⚠️Note:** there is another `hwinfo` package in the `extras` bucket, so please make sure you always use `maciak/hwinfo` to avoid conflicts.
